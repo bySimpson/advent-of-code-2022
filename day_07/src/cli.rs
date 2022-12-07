@@ -66,16 +66,33 @@ impl Folder {
         score
     }
 
-    pub fn get_folders_smaller_then(&self, max_size: i32) -> Vec<i32> {
+    pub fn get_every_size(&self) -> Vec<i32> {
         let mut out_vec: Vec<i32> = vec![];
         for c_child in self.folders.iter() {
-            out_vec.append(&mut c_child.borrow().get_folders_smaller_then(max_size));
+            out_vec.append(&mut c_child.borrow().get_every_size());
             out_vec.push(c_child.borrow().total_size);
         }
-        let output = out_vec
+
+        out_vec
+    }
+
+    pub fn get_folders_smaller_then(&self, max_size: i32) -> Vec<i32> {
+        let output = self
+            .get_every_size()
             .into_iter()
             .filter(|x| x < &max_size)
             .collect::<Vec<i32>>();
         output
+    }
+
+    pub fn get_smallest_directory(&self, total_amount: i32) -> i32 {
+        let amount_to_free = (total_amount - self.total_size - 30000000) * -1;
+        let mut larger_than_required = self
+            .get_every_size()
+            .into_iter()
+            .filter(|x| x.to_owned() > amount_to_free)
+            .collect::<Vec<i32>>();
+        larger_than_required.sort();
+        larger_than_required[0]
     }
 }

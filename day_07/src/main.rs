@@ -84,7 +84,12 @@ fn challenge_1_2() -> io::Result<()> {
         .iter()
         .sum::<i32>();
 
+    let points_2 = root_folder
+        .deref()
+        .borrow()
+        .get_smallest_directory(70000000);
+
     println!("Points 1:\t{}", points_1);
-    println!("Points 2:\t{}", "");
+    println!("Points 2:\t{}", points_2);
     Ok(())
 }
