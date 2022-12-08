@@ -98,15 +98,6 @@ fn is_visible(grid: Vec<Vec<i32>>, horizontal_pos: i32, vertical_pos: i32) -> bo
             break;
         }
     }
-    /*println!(
-        "x: {} y: {} -  t: {} b: {} l: {} r: {}",
-        vertical_pos,
-        horizontal_pos,
-        visible_from_top,
-        visible_from_bottom,
-        visible_from_left,
-        visible_from_right
-    );*/
     return visible_from_top || visible_from_bottom || visible_from_left || visible_from_right;
 }
 
@@ -125,7 +116,6 @@ fn viewing_distance(grid: Vec<Vec<i32>>, horizontal_pos: i32, vertical_pos: i32)
     for c_tree_pos in (0..vertical_pos).rev() {
         viewing_distance_top += 1;
         if vertical_line[c_tree_pos as usize] >= c_val {
-            //viewing_distance_top += 1;
             break;
         }
     }
@@ -134,7 +124,6 @@ fn viewing_distance(grid: Vec<Vec<i32>>, horizontal_pos: i32, vertical_pos: i32)
     for c_tree_pos in vertical_pos + 1..vertical_line.len() as i32 {
         viewing_distance_bottom += 1;
         if vertical_line[c_tree_pos as usize] >= c_val {
-            //viewing_distance_bottom += 1;
             break;
         }
     }
@@ -145,27 +134,15 @@ fn viewing_distance(grid: Vec<Vec<i32>>, horizontal_pos: i32, vertical_pos: i32)
         if grid[vertical_pos as usize][c_tree_pos as usize] as i32 >= c_val {
             break;
         }
-        //viewing_distance_left += 1;
     }
 
     // visible from right
     for c_tree_pos in horizontal_pos + 1..grid[vertical_pos as usize].len() as i32 {
         viewing_distance_right += 1;
         if grid[vertical_pos as usize][c_tree_pos as usize] as i32 >= c_val {
-            //viewing_distance_right += 1;
             break;
         }
     }
-    /*println!(
-        "v: {} x: {} y: {} -  t: {} b: {} l: {} r: {}",
-        c_val,
-        vertical_pos,
-        horizontal_pos,
-        viewing_distance_top,
-        viewing_distance_bottom,
-        viewing_distance_left,
-        viewing_distance_right
-    );*/
     return viewing_distance_top
         * viewing_distance_bottom
         * viewing_distance_left
