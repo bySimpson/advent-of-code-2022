@@ -13,70 +13,19 @@ struct Args {
 }
 
 fn main() -> io::Result<()> {
-    challenge_1().unwrap();
-    challenge_2().unwrap();
+    challenge_1_2().unwrap();
+    //challenge_2().unwrap();
     Ok(())
 }
 
-fn challenge_1() -> io::Result<()> {
-    let mut head_pos: (i32, i32) = (0, 0);
-    let mut tail_pos: (i32, i32) = (0, 0);
-    let mut visited = vec![];
-    visited.push(tail_pos);
-    let args = Args::parse();
-    // File hosts must exist in current path before this produces output
-    let file = File::open(args.path)?;
-    let reader = BufReader::new(file);
-
-    for line in reader.lines() {
-        let c_line = line?;
-        let command = c_line.split(" ").collect::<Vec<&str>>();
-        for _ in 0..command[1].parse::<i32>().unwrap() {
-            match command[0] {
-                "R" => {
-                    head_pos.0 += 1;
-                }
-                "L" => {
-                    head_pos.0 -= 1;
-                }
-                "U" => {
-                    head_pos.1 += 1;
-                }
-                "D" => {
-                    head_pos.1 -= 1;
-                }
-                _ => {
-                    panic!("Invalid command!")
-                }
-            }
-            if (head_pos.0 == tail_pos.0 && (head_pos.1 - tail_pos.1).abs() == 1)
-                || (head_pos.1 == tail_pos.1 && (head_pos.0 - tail_pos.0).abs() == 1)
-                || (head_pos.0 - tail_pos.0).abs() == 1 && (head_pos.1 - tail_pos.1).abs() == 1
-            {
-                // don't move!
-                continue;
-            } else {
-                tail_pos.0 += get_direction(head_pos.0 - tail_pos.0);
-                tail_pos.1 += get_direction(head_pos.1 - tail_pos.1);
-                if !visited.contains(&tail_pos) {
-                    visited.push(tail_pos);
-                }
-            }
-        }
-    }
-
-    //let visible = grid.len() * grid[0].len() - hidden;
-
-    println!("Points 1:\t{}", visited.len());
-    Ok(())
-}
-
-fn challenge_2() -> io::Result<()> {
-    /*let mut head_pos: (i32, i32) = (0, 0);
-    let mut tail_pos: (i32, i32) = (0, 0);*/
-    let mut knots: Vec<(i32, i32)> = vec![(0, 0); 10];
+fn challenge_1_2() -> io::Result<()> {
+    //part 1
     let mut visited = vec![];
     visited.push((0, 0));
+
+    //part 2
+    let mut visited_2 = visited.clone();
+    let mut knots: Vec<(i32, i32)> = vec![(0, 0); 10];
     let args = Args::parse();
     // File hosts must exist in current path before this produces output
     let file = File::open(args.path)?;
@@ -103,6 +52,8 @@ fn challenge_2() -> io::Result<()> {
                     panic!("Invalid command!")
                 }
             }
+
+            //part 2
             'inner: for i in 1..10 {
                 if (knots[i].0 == knots[i - 1].0 && (knots[i].1 - knots[i - 1].1).abs() == 1)
                     || (knots[i].1 == knots[i - 1].1 && (knots[i].0 - knots[i - 1].0).abs() == 1)
@@ -116,16 +67,20 @@ fn challenge_2() -> io::Result<()> {
                     knots[i].0 += get_direction(knots[i - 1].0 - knots[i].0);
                     knots[i].1 += get_direction(knots[i - 1].1 - knots[i].1);
                 }
-                if !visited.contains(&knots.last().unwrap()) {
-                    visited.push(knots.last().unwrap().clone());
+                //part 1
+                if !visited.contains(&knots[1]) {
+                    visited.push(knots[1].clone());
+                }
+                //part 2
+                if !visited_2.contains(&knots.last().unwrap()) {
+                    visited_2.push(knots.last().unwrap().clone());
                 }
             }
         }
     }
 
-    //let visible = grid.len() * grid[0].len() - hidden;
-
-    println!("Points 2:\t{}", visited.len());
+    println!("Points 1:\t{}", visited.len());
+    println!("Points 2:\t{}", visited_2.len());
     Ok(())
 }
 
