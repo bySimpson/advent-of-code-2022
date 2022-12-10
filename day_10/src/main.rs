@@ -39,7 +39,7 @@ fn challenge_1_2() -> io::Result<()> {
     let mut signal_strengths: Vec<i32> = vec![];
 
     // part 1
-    for c_cmd in commands.clone() {
+    for c_cmd in commands {
         for _ in 0..c_cmd.get_iterations() {
             //part 1
             iteration_1 += 1;
