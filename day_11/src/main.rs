@@ -37,14 +37,14 @@ fn challenge_1_2() -> io::Result<()> {
                 match monkeys_1[monkey_nmbr].operation {
                     Operation::Multiply(nmbr) => {
                         if nmbr == 0 {
-                            c_item *= c_item.clone();
+                            c_item *= c_item;
                         } else {
                             c_item *= nmbr;
                         }
                     }
                     Operation::Plus(nmbr) => {
                         if nmbr == 0 {
-                            c_item += c_item.clone();
+                            c_item += c_item;
                         } else {
                             c_item += nmbr;
                         }
@@ -52,11 +52,10 @@ fn challenge_1_2() -> io::Result<()> {
                 }
                 //less worry after inspection
                 c_item /= 3;
-                let monkey_nmbr_to_throw =
-                    match c_item.clone() % monkeys_1[monkey_nmbr].divisible_by == 0 {
-                        true => monkeys_1[monkey_nmbr].if_true,
-                        false => monkeys_1[monkey_nmbr].if_false,
-                    };
+                let monkey_nmbr_to_throw = match c_item % monkeys_1[monkey_nmbr].divisible_by == 0 {
+                    true => monkeys_1[monkey_nmbr].if_true,
+                    false => monkeys_1[monkey_nmbr].if_false,
+                };
                 monkeys_1[monkey_nmbr_to_throw as usize].items.push(c_item);
 
                 //increase inspection counterbig
@@ -87,24 +86,23 @@ fn challenge_1_2() -> io::Result<()> {
                 match monkeys_2[monkey_nmbr].operation {
                     Operation::Multiply(nmbr) => {
                         if nmbr == 0 {
-                            c_item = c_item.clone() * c_item;
+                            c_item *= c_item;
                         } else {
-                            c_item = c_item.clone() * nmbr;
+                            c_item *= nmbr;
                         }
                     }
                     Operation::Plus(nmbr) => {
                         if nmbr == 0 {
-                            c_item = c_item.clone() + c_item;
+                            c_item += c_item;
                         } else {
                             c_item += nmbr;
                         }
                     }
                 }
-                let monkey_nmbr_to_throw =
-                    match c_item.clone() % monkeys_2[monkey_nmbr].divisible_by == 0 {
-                        true => monkeys_2[monkey_nmbr].if_true,
-                        false => monkeys_2[monkey_nmbr].if_false,
-                    };
+                let monkey_nmbr_to_throw = match c_item % monkeys_2[monkey_nmbr].divisible_by == 0 {
+                    true => monkeys_2[monkey_nmbr].if_true,
+                    false => monkeys_2[monkey_nmbr].if_false,
+                };
                 monkeys_2[monkey_nmbr_to_throw as usize].items.push(c_item);
 
                 //increase inspection counter
