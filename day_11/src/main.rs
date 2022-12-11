@@ -22,28 +22,29 @@ fn challenge_1_2() -> io::Result<()> {
     // File hosts must exist in current path before this produces output
     let input_str = fs::read_to_string(args.path)?.replace("\r\n", "\n");
 
-    let mut monkeys: Vec<Monkey> = vec![];
+    let mut monkeys_1: Vec<Monkey> = vec![];
 
     // parse input
     for c_monkey_input in input_str.split("\n\n") {
-        monkeys.push(Monkey::new(c_monkey_input.to_string()));
+        monkeys_1.push(Monkey::new(c_monkey_input.to_string()));
     }
+    let mut monkeys_2 = monkeys_1.clone();
 
     for _ in 0..20 {
-        for monkey_nmbr in 0..monkeys.len() {
-            for mut c_item in monkeys[monkey_nmbr].items.clone().into_iter() {
+        for monkey_nmbr in 0..monkeys_1.len() {
+            for mut c_item in monkeys_1[monkey_nmbr].items.clone().into_iter() {
                 // do inspection
-                match monkeys[monkey_nmbr].operation {
+                match monkeys_1[monkey_nmbr].operation {
                     Operation::Multiply(nmbr) => {
                         if nmbr == 0 {
-                            c_item *= c_item;
+                            c_item *= c_item.clone();
                         } else {
                             c_item *= nmbr;
                         }
                     }
                     Operation::Plus(nmbr) => {
                         if nmbr == 0 {
-                            c_item += c_item;
+                            c_item += c_item.clone();
                         } else {
                             c_item += nmbr;
                         }
@@ -51,28 +52,76 @@ fn challenge_1_2() -> io::Result<()> {
                 }
                 //less worry after inspection
                 c_item /= 3;
-                let monkey_nmbr_to_throw = match c_item % monkeys[monkey_nmbr].divisible_by == 0 {
-                    true => monkeys[monkey_nmbr].if_true,
-                    false => monkeys[monkey_nmbr].if_false,
-                };
-                monkeys[monkey_nmbr_to_throw as usize].items.push(c_item);
+                let monkey_nmbr_to_throw =
+                    match c_item.clone() % monkeys_1[monkey_nmbr].divisible_by == 0 {
+                        true => monkeys_1[monkey_nmbr].if_true,
+                        false => monkeys_1[monkey_nmbr].if_false,
+                    };
+                monkeys_1[monkey_nmbr_to_throw as usize].items.push(c_item);
 
-                //increase inspection counter
-                monkeys[monkey_nmbr as usize].total_inspected_items += 1;
+                //increase inspection counterbig
+                monkeys_1[monkey_nmbr as usize].total_inspected_items += 1;
             }
-            monkeys[monkey_nmbr].items = vec![];
+            monkeys_1[monkey_nmbr].items = vec![];
         }
     }
-    let mut monkey_interactions = monkeys
+    let mut monkey_interactions = monkeys_1
         .iter()
         .map(|c_monkey| c_monkey.total_inspected_items)
-        .collect::<Vec<i32>>();
+        .collect::<Vec<i64>>();
     monkey_interactions.sort();
     println!(
         "Points 1:\t{:?}",
         monkey_interactions[monkey_interactions.len() - 1]
             * monkey_interactions[monkey_interactions.len() - 2]
     );
-    println!("Points 2:\t{}", "");
+
+    let base: i64 = monkeys_2.iter().map(|x| x.divisible_by).product();
+    for _ in 0..10000 {
+        for monkey_nmbr in 0..monkeys_2.len() {
+            for mut c_item in monkeys_2[monkey_nmbr].items.clone().into_iter() {
+                // do inspection
+                //less worry after inspection
+                c_item %= base;
+                match monkeys_2[monkey_nmbr].operation {
+                    Operation::Multiply(nmbr) => {
+                        if nmbr == 0 {
+                            c_item = c_item.clone() * c_item;
+                        } else {
+                            c_item = c_item.clone() * nmbr;
+                        }
+                    }
+                    Operation::Plus(nmbr) => {
+                        if nmbr == 0 {
+                            c_item = c_item.clone() + c_item;
+                        } else {
+                            c_item += nmbr;
+                        }
+                    }
+                }
+                let monkey_nmbr_to_throw =
+                    match c_item.clone() % monkeys_2[monkey_nmbr].divisible_by == 0 {
+                        true => monkeys_2[monkey_nmbr].if_true,
+                        false => monkeys_2[monkey_nmbr].if_false,
+                    };
+                monkeys_2[monkey_nmbr_to_throw as usize].items.push(c_item);
+
+                //increase inspection counter
+                monkeys_2[monkey_nmbr as usize].total_inspected_items += 1;
+            }
+            monkeys_2[monkey_nmbr].items = vec![];
+        }
+    }
+
+    let mut monkey_interactions = monkeys_2
+        .iter()
+        .map(|c_monkey| c_monkey.total_inspected_items)
+        .collect::<Vec<i64>>();
+    monkey_interactions.sort();
+    println!(
+        "Points 2:\t{:?}",
+        monkey_interactions[monkey_interactions.len() - 1]
+            * monkey_interactions[monkey_interactions.len() - 2]
+    );
     Ok(())
 }

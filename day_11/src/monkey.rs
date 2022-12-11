@@ -1,24 +1,24 @@
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum Operation {
-    Plus(i32),
-    Multiply(i32),
+    Plus(i64),
+    Multiply(i64),
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Monkey {
     pub operation: Operation, // 0 -> by itself
-    pub items: Vec<i32>,      // i32 --> worry level
-    pub divisible_by: i32,
-    pub if_true: i32,  // to monkey nr
-    pub if_false: i32, // to monkey nr
-    pub total_inspected_items: i32,
+    pub items: Vec<i64>,      // i64 --> worry level
+    pub divisible_by: i64,
+    pub if_true: i64,  // to monkey nr
+    pub if_false: i64, // to monkey nr
+    pub total_inspected_items: i64,
 }
 
 impl Monkey {
     pub fn new(input_line: String) -> Self {
         let split_input = input_line.split("\n").collect::<Vec<&str>>();
         // get Operation
-        let operation_multiplier = match split_input[2].split(" ").last().unwrap().parse::<i32>() {
+        let operation_multiplier = match split_input[2].split(" ").last().unwrap().parse::<i64>() {
             Ok(val) => val,
             _ => 0,
         };
@@ -32,15 +32,15 @@ impl Monkey {
         let binding = split_input[1].to_string().replace("  Starting items: ", "");
         let items = binding
             .split(", ")
-            .map(|c_item| c_item.parse::<i32>().unwrap())
-            .collect::<Vec<i32>>();
+            .map(|c_item| c_item.parse::<i64>().unwrap())
+            .collect::<Vec<i64>>();
 
         // divisible
         let divisible_by = split_input[3]
             .split(" ")
             .last()
             .unwrap()
-            .parse::<i32>()
+            .parse::<i64>()
             .unwrap();
 
         // if true
@@ -48,7 +48,7 @@ impl Monkey {
             .split(" ")
             .last()
             .unwrap()
-            .parse::<i32>()
+            .parse::<i64>()
             .unwrap();
 
         // if false
@@ -56,7 +56,7 @@ impl Monkey {
             .split(" ")
             .last()
             .unwrap()
-            .parse::<i32>()
+            .parse::<i64>()
             .unwrap();
 
         Self {
