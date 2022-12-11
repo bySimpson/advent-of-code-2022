@@ -76,12 +76,13 @@ fn challenge_1_2() -> io::Result<()> {
             * monkey_interactions[monkey_interactions.len() - 2]
     );
 
+    // get base of divisibles
     let base: i64 = monkeys_2.iter().map(|x| x.divisible_by).product();
     for _ in 0..10000 {
         for monkey_nmbr in 0..monkeys_2.len() {
             for mut c_item in monkeys_2[monkey_nmbr].items.clone().into_iter() {
                 // do inspection
-                //less worry after inspection
+                // apply base
                 c_item %= base;
                 match monkeys_2[monkey_nmbr].operation {
                     Operation::Multiply(nmbr) => {
