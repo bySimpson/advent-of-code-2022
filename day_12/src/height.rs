@@ -18,8 +18,8 @@ impl HeightMap {
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Sorting {
     height_map: Vec<Vec<HeightMap>>,
-    start_coordinates: (i32, i32),
-    end_coordinates: (i32, i32),
+    pub start_coordinates: (i32, i32),
+    pub end_coordinates: (i32, i32),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]

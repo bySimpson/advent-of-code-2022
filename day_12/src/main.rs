@@ -63,8 +63,8 @@ fn challenge_1_2() -> io::Result<()> {
     if start_coordinates == None || end_coordinates == None {
         panic!("Could not find start/end coordinates!");
     }
-    let sorting = Sorting::new(
-        height_map,
+    let mut sorting = Sorting::new(
+        height_map.clone(),
         start_coordinates.unwrap(),
         end_coordinates.unwrap(),
     );
@@ -87,6 +87,40 @@ fn challenge_1_2() -> io::Result<()> {
     );
 
     // part 2
-    println!("Points 2:\t{:?}", "Not yet implemented");
+    let mut starting_points: Vec<(i32, i32)> = vec![start_coordinates.unwrap()];
+    for y_coordinate in 0..height_map.len() {
+        for x_coordinate in 0..height_map[y_coordinate].len() {
+            let c_val = height_map[y_coordinate][x_coordinate];
+            match c_val {
+                HeightMap::Height(val) => {
+                    if val == 'a' as i32 {
+                        starting_points.push((x_coordinate as i32, y_coordinate as i32))
+                    }
+                }
+                _ => (),
+            }
+        }
+    }
+
+    let mut steps_required: Vec<i32> = vec![];
+    for c_starting_point in starting_points {
+        sorting.start_coordinates = c_starting_point;
+        let result = dijkstra(
+            &sorting.start_coordinates,
+            |c| {
+                sorting
+                    .get_successors(*c)
+                    .iter()
+                    .map(|s| (s.pos, s.cost))
+                    .collect::<Vec<_>>()
+            },
+            |g| *g == sorting.end_coordinates,
+        );
+        match result {
+            Some(val) => steps_required.push(val.0.len() as i32),
+            _ => (),
+        }
+    }
+    println!("Points 2:\t{:?}", steps_required.iter().min().unwrap() - 1);
     Ok(())
 }
