@@ -1,4 +1,4 @@
-use std::{fs, io, result, vec};
+use std::{fs, io, vec};
 
 use clap::Parser;
 use pathfinding::prelude::dijkstra;
@@ -63,8 +63,8 @@ fn challenge_1_2() -> io::Result<()> {
     if start_coordinates == None || end_coordinates == None {
         panic!("Could not find start/end coordinates!");
     }
-    let mut sorting = Sorting::new(
-        height_map.clone(),
+    let sorting = Sorting::new(
+        height_map,
         start_coordinates.unwrap(),
         end_coordinates.unwrap(),
     );
@@ -89,11 +89,4 @@ fn challenge_1_2() -> io::Result<()> {
     // part 2
     println!("Points 2:\t{:?}", "Not yet implemented");
     Ok(())
-}
-
-pub fn get_shortest_path(
-    height_map: &Vec<Vec<HeightMap>>,
-    current_point: (i32, i32),
-    end_point: (i32, i32),
-) {
 }
