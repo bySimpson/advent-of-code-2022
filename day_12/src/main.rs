@@ -64,7 +64,7 @@ fn challenge_1_2() -> io::Result<()> {
         panic!("Could not find start/end coordinates!");
     }
     let mut sorting = Sorting::new(
-        height_map,
+        height_map.clone(),
         start_coordinates.unwrap(),
         end_coordinates.unwrap(),
     );
@@ -80,18 +80,14 @@ fn challenge_1_2() -> io::Result<()> {
         },
         |g| *g == end_coordinates.unwrap(),
     );
-    println!("{:?}", result);
     //part 1
     println!(
         "Points 1:\t{:?}",
-        "simulate_rounds(monkeys_1, 20, |x| x / 3)"
+        result.expect("No path found!").0.len() - 1
     );
 
     // part 2
-    println!(
-        "Points 2:\t{:?}",
-        "simulate_rounds(monkeys_2, 10000, |x| x % base)"
-    );
+    println!("Points 2:\t{:?}", "Not yet implemented");
     Ok(())
 }
 

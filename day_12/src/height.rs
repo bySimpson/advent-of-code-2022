@@ -8,21 +8,21 @@ pub enum HeightMap {
 impl HeightMap {
     pub fn get_height(&self) -> i32 {
         match self {
-            HeightMap::Start => 0,
+            HeightMap::Start => 'a' as i32,
             HeightMap::Height(val) => *val,
-            HeightMap::End => -1,
+            HeightMap::End => 'z' as i32,
         }
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Sorting {
     height_map: Vec<Vec<HeightMap>>,
     start_coordinates: (i32, i32),
     end_coordinates: (i32, i32),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct Successor {
     pub pos: (i32, i32),
     pub cost: i32,
@@ -49,7 +49,11 @@ impl Sorting {
             let pos_x = position.0 as usize;
             let pos_y = (position.1 - 1) as usize;
             let val = self.height_map[pos_y][pos_x].get_height();
-            if !(current + 1) < val {
+            if current >= val - 1 {
+                /*println!(
+                    "[{} {}] allowed [{} {}]",
+                    position.0, position.1, pos_x, pos_y
+                );*/
                 output.push(Successor {
                     pos: (pos_x as i32, pos_y as i32),
                     cost: val,
@@ -61,7 +65,11 @@ impl Sorting {
             let pos_x = (position.0 - 1) as usize;
             let pos_y = (position.1) as usize;
             let val = self.height_map[pos_y][pos_x].get_height();
-            if !(current + 1) < val {
+            if current >= val - 1 {
+                /*println!(
+                    "[{} {}] allowed [{} {}]",
+                    position.0, position.1, pos_x, pos_y
+                );*/
                 output.push(Successor {
                     pos: (pos_x as i32, pos_y as i32),
                     cost: val,
@@ -73,7 +81,11 @@ impl Sorting {
             let pos_x = position.0 as usize;
             let pos_y = (position.1 + 1) as usize;
             let val = self.height_map[pos_y][pos_x].get_height();
-            if !(current + 1) < val {
+            if current >= val - 1 {
+                /*println!(
+                    "[{} {}] allowed [{} {}]",
+                    position.0, position.1, pos_x, pos_y
+                );*/
                 output.push(Successor {
                     pos: (pos_x as i32, pos_y as i32),
                     cost: val,
@@ -85,7 +97,11 @@ impl Sorting {
             let pos_x = (position.0 + 1) as usize;
             let pos_y = (position.1) as usize;
             let val = self.height_map[pos_y][pos_x].get_height();
-            if !(current + 1) < val {
+            if current >= val - 1 {
+                /*println!(
+                    "[{} {}] allowed [{} {}]",
+                    position.0, position.1, pos_x, pos_y
+                );*/
                 output.push(Successor {
                     pos: (pos_x as i32, pos_y as i32),
                     cost: val,
