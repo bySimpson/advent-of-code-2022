@@ -23,18 +23,39 @@ fn challenge_1_2() -> io::Result<()> {
     // parse input
     let mut index = 1;
     let mut indexes_smaller: Vec<i32> = vec![];
+
+    let mut integerlists: Vec<IntList> = vec![];
     for c_comparison in input_str.split("\n\n") {
         let parts = c_comparison.split("\n").collect::<Vec<&str>>();
-        let left_str = IntList::parse(parts[0].to_string());
-        let right_str = IntList::parse(parts[1].to_string());
-        match IntList::compare(&left_str, &right_str) {
+        let left = IntList::parse(parts[0].to_string());
+        let right = IntList::parse(parts[1].to_string());
+        match IntList::compare(&left, &right) {
             Ordering::Less => indexes_smaller.push(index),
             _ => (),
         }
+
+        integerlists.push(left);
+        integerlists.push(right);
         index += 1;
     }
 
     println!("Points 1:\t{}", indexes_smaller.iter().sum::<i32>());
+
+    //part 2
+    let seperators = vec![
+        IntList::List(vec![IntList::List(vec![IntList::Integer(2)])]),
+        IntList::List(vec![IntList::List(vec![IntList::Integer(6)])]),
+    ];
+    integerlists.append(&mut seperators.clone());
+    integerlists.sort_by(IntList::compare);
+    let mut points_2 = 1;
+    for i in 0..integerlists.len() {
+        if seperators.contains(&integerlists[i]) {
+            points_2 *= i + 1;
+        }
+    }
+
+    println!("Points 2:\t{}", points_2);
 
     Ok(())
 }
