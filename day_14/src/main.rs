@@ -1,13 +1,15 @@
-use std::cmp::Ordering;
-use std::{fs, io, vec};
+use std::{fs, io};
 
 use clap::Parser;
-use intlist::IntList;
-mod intlist;
+
+use crate::grid::Grid;
+
+mod grid;
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(short, long, default_value = "./challenges/challenge_13.txt")]
+    #[arg(short, long, default_value = "./challenges/challenge_14.txt")]
     path: String,
 }
 
@@ -20,42 +22,50 @@ fn challenge_1_2() -> io::Result<()> {
     let args = Args::parse();
     // File hosts must exist in current path before this produces output
     let input_str = fs::read_to_string(args.path)?.replace("\r\n", "\n");
+
+    //get grid size
+    let mut max_x = 0;
+    let mut max_y = 0;
+    for c_line in input_str.split("\n") {
+        let coords = c_line
+            .split(" -> ")
+            .map(|c_coord| {
+                let cordinate = c_coord
+                    .split(",")
+                    .map(|axis| axis.parse::<i32>().unwrap())
+                    .collect::<Vec<i32>>();
+                (cordinate[0], cordinate[1])
+            })
+            .collect::<Vec<(i32, i32)>>();
+        max_x = max_x.max(coords.iter().map(|x| x.0).max().unwrap() + 1);
+        max_y = max_y.max(coords.iter().map(|x| x.1).max().unwrap() + 1);
+    }
+
     // parse input
-    let mut index = 1;
-    let mut indexes_smaller: Vec<i32> = vec![];
-
-    let mut integerlists: Vec<IntList> = vec![];
-    for c_comparison in input_str.split("\n\n") {
-        let parts = c_comparison.split("\n").collect::<Vec<&str>>();
-        let left = IntList::parse(parts[0].to_string());
-        let right = IntList::parse(parts[1].to_string());
-        match IntList::compare(&left, &right) {
-            Ordering::Less => indexes_smaller.push(index),
-            _ => (),
-        }
-
-        integerlists.push(left);
-        integerlists.push(right);
-        index += 1;
-    }
-
-    println!("Points 1:\t{}", indexes_smaller.iter().sum::<i32>());
-
-    //part 2
-    let seperators = vec![
-        IntList::List(vec![IntList::List(vec![IntList::Integer(2)])]),
-        IntList::List(vec![IntList::List(vec![IntList::Integer(6)])]),
-    ];
-    integerlists.append(&mut seperators.clone());
-    integerlists.sort_by(IntList::compare);
-    let mut points_2 = 1;
-    for i in 0..integerlists.len() {
-        if seperators.contains(&integerlists[i]) {
-            points_2 *= i + 1;
+    let mut grid = Grid::new(max_x, max_y);
+    for c_line in input_str.split("\n") {
+        let coords = c_line
+            .split(" -> ")
+            .map(|c_coord| {
+                let cordinate = c_coord
+                    .split(",")
+                    .map(|axis| axis.parse::<i32>().unwrap())
+                    .collect::<Vec<i32>>();
+                (cordinate[0], cordinate[1])
+            })
+            .collect::<Vec<(i32, i32)>>();
+        for i in 0..coords.len() - 1 as usize {
+            grid.insert_obstacle(coords[i], coords[i + 1]);
         }
     }
+    let mut count_sand_corns = 0;
+    while grid.simulate_sand() {
+        count_sand_corns += 1;
+    }
+    println!("{}", grid);
+    println!("Points 1:\t{}", count_sand_corns);
 
-    println!("Points 2:\t{}", points_2);
+    println!("Points 2:\t{}", "points_2");
 
     Ok(())
 }
