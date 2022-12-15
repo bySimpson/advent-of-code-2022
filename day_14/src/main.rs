@@ -24,7 +24,6 @@ fn challenge_1_2() -> io::Result<()> {
     let input_str = fs::read_to_string(args.path)?.replace("\r\n", "\n");
 
     //get grid size
-    let mut max_x = 0;
     let mut max_y = 0;
     for c_line in input_str.split("\n") {
         let coords = c_line
@@ -37,12 +36,15 @@ fn challenge_1_2() -> io::Result<()> {
                 (cordinate[0], cordinate[1])
             })
             .collect::<Vec<(i32, i32)>>();
-        max_x = max_x.max(coords.iter().map(|x| x.0).max().unwrap() + 1);
         max_y = max_y.max(coords.iter().map(|x| x.1).max().unwrap() + 1);
     }
 
+    // part 2: max + 2 = y
+    max_y = max_y + 2;
+
     // parse input
-    let mut grid = Grid::new(max_x, max_y);
+    let size_x = 1000;
+    let mut grid = Grid::new(size_x, max_y);
     for c_line in input_str.split("\n") {
         let coords = c_line
             .split(" -> ")
@@ -58,14 +60,22 @@ fn challenge_1_2() -> io::Result<()> {
             grid.insert_obstacle(coords[i], coords[i + 1]);
         }
     }
+    let mut grid_2 = grid.clone();
+
+    //part 1
     let mut count_sand_corns = 0;
     while grid.simulate_sand() {
         count_sand_corns += 1;
     }
-    println!("{}", grid);
     println!("Points 1:\t{}", count_sand_corns);
 
-    println!("Points 2:\t{}", "points_2");
+    //part 2
+    grid_2.insert_obstacle((0, max_y - 1), (size_x - 1, max_y - 1));
+    let mut count_sand_corns_2 = 0;
+    while grid_2.simulate_sand() {
+        count_sand_corns_2 += 1;
+    }
+    println!("Points 2:\t{}", count_sand_corns_2);
 
     Ok(())
 }

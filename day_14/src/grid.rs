@@ -7,6 +7,7 @@ pub enum FieldType {
     Obstacle,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Grid {
     pub items: Vec<Vec<FieldType>>,
     size_x: i32,
@@ -18,7 +19,8 @@ impl fmt::Display for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
         for y_coord in 0..self.items[0].len() {
-            for x_coord in 450..self.items.len() {
+            for x_coord in 450..550 {
+                //self.items.len() {
                 s.push(match self.items[x_coord as usize][y_coord as usize] {
                     FieldType::Sand => 'o',
                     FieldType::Empty => '.',
@@ -71,6 +73,11 @@ impl Grid {
     /// simulates sand; true --> still on screen; false --> in abyss
     pub fn simulate_sand(&mut self) -> bool {
         let mut c_sand_position = self.sand_starting_point;
+        if self.items[self.sand_starting_point.0 as usize][self.sand_starting_point.1 as usize]
+            == FieldType::Sand
+        {
+            return false;
+        }
         for y_coord in self.sand_starting_point.1..self.size_y - 1 {
             c_sand_position = (c_sand_position.0, y_coord);
             let collision_down =
@@ -89,7 +96,7 @@ impl Grid {
                     }
                 }
                 //right
-                if c_sand_position.0 < self.size_x {
+                if c_sand_position.0 < self.size_x - 1 {
                     let obstacle_right_down = self.items[(c_sand_position.0 + 1) as usize]
                         [(c_sand_position.1 + 1) as usize];
                     if obstacle_right_down == FieldType::Empty {
