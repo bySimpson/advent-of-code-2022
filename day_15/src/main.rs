@@ -1,11 +1,8 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fs, io,
-};
+use std::{collections::HashMap, fs, io, ops::RangeInclusive};
 
 use clap::Parser;
 
-use crate::grid::Sensor;
+use crate::grid::{combine_ranges, Sensor};
 
 mod grid;
 
@@ -27,7 +24,7 @@ fn challenge_1_2() -> io::Result<()> {
     let input_str = fs::read_to_string(args.path)?.replace("\r\n", "\n");
 
     let mut sensors: Vec<Sensor> = vec![];
-    let mut beacons: Vec<(i32, i32)> = vec![];
+    let mut beacons: Vec<(i64, i64)> = vec![];
 
     for c_line in input_str.split("\n") {
         let replaced_string = c_line
@@ -40,7 +37,7 @@ fn challenge_1_2() -> io::Result<()> {
             .map(|object| {
                 let coordinates = object
                     .split(",")
-                    .map(|item| item.parse::<i32>().unwrap())
+                    .map(|item| item.parse::<i64>().unwrap())
                     .collect::<Vec<_>>();
                 (coordinates[0], coordinates[1])
             })
@@ -54,7 +51,7 @@ fn challenge_1_2() -> io::Result<()> {
 
     let line_in_question = 2000000;
 
-    let mut overlaps: HashMap<i32, i32> = HashMap::new();
+    let mut overlaps: HashMap<i64, i64> = HashMap::new();
     for c_sensor in sensors.clone() {
         let c_overlap = c_sensor.get_overlap(line_in_question);
         for c_overlap_item in c_overlap {
@@ -67,21 +64,28 @@ fn challenge_1_2() -> io::Result<()> {
     println!("Points 1:\t{}", overlaps.len());
 
     //part 2
-    let size: i32 = 4000000;
+    let size: i64 = 4000000;
     let mut found = (0, 0);
     'outer: for c_line_nmbr in 0..=size {
-        let mut overlaps: HashSet<i32> = HashSet::new();
+        let mut overlaps: Vec<RangeInclusive<i64>> = vec![];
         for c_sensor in sensors.clone() {
-            let c_overlap = c_sensor.get_overlap(c_line_nmbr);
+            let c_overlap = c_sensor.get_overlap_iterators(c_line_nmbr);
             for c_overlap_item in c_overlap {
                 //if !beacons.contains(&(c_overlap_item, c_line_nmbr)) {
-                if c_overlap_item >= 0 && c_overlap_item <= size {
-                    overlaps.insert(c_overlap_item);
-                }
+                overlaps.push(c_overlap_item);
                 //}
             }
         }
-        if overlaps.len() != (size + 1) as usize {
+        combine_ranges(&mut overlaps);
+        if overlaps.len() != 1 {
+            for range_nmbr in 0..overlaps.len() {
+                if overlaps[range_nmbr].end() + 1 != *overlaps[range_nmbr + 1].start() {
+                    found = (overlaps[range_nmbr].end() + 1 as i64, c_line_nmbr);
+                    break 'outer;
+                }
+            }
+        }
+        /*if overlaps.len() != (size + 1) as usize {
             let start = overlaps.iter().min().unwrap().clone();
             let stop = overlaps.iter().max().unwrap().clone();
             //if start <= 0 && stop >= size {
@@ -92,10 +96,8 @@ fn challenge_1_2() -> io::Result<()> {
                     break 'outer;
                 }
             }
-        }
+        }*/
         //}
-
-        println!("Line {}", c_line_nmbr);
     }
     let points = found.0 * 4_000_000 + found.1;
     println!("Points 2:\t{:?}", points);
