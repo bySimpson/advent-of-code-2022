@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -7,7 +8,7 @@ pub enum Move {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-#[repr(u32)]
+#[repr(u64)]
 pub enum Shape {
     HorizontalLine = 0,
     Cross = 1,
@@ -17,8 +18,8 @@ pub enum Shape {
 }
 
 impl Shape {
-    pub fn get_rock_formation(&self, starting_position: (u32, u32)) -> Vec<(u32, u32)> {
-        let output_vec: Vec<(u32, u32)> = match self {
+    pub fn get_rock_formation(&self, starting_position: (u64, u64)) -> Vec<(u64, u64)> {
+        let output_vec: Vec<(u64, u64)> = match self {
             Self::HorizontalLine => {
                 vec![
                     (starting_position.0 + 2, starting_position.1), // ..####.
@@ -65,7 +66,7 @@ impl Shape {
         output_vec
     }
 
-    pub fn get_max_height(&self) -> u32 {
+    pub fn get_max_height(&self) -> u64 {
         match &self {
             Self::HorizontalLine => 1,
             Self::Cross => 3,
@@ -78,12 +79,12 @@ impl Shape {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Rock {
-    points: Vec<(u32, u32)>,
+    points: Vec<(u64, u64)>,
     shape: Shape,
 }
 
 impl Rock {
-    pub fn new(shape: Shape, starting_position: (u32, u32)) -> Self {
+    pub fn new(shape: Shape, starting_position: (u64, u64)) -> Self {
         Self {
             shape,
             points: shape.get_rock_formation(starting_position),
@@ -99,57 +100,70 @@ pub enum FieldType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Game {
-    pub grid: Vec<Vec<FieldType>>,
+    pub grid: Vec<VecDeque<FieldType>>,
     current_rock: Rock,
     instructions: Vec<Move>,
-    pub max_height: u32,
-    current_instruction_position: u32,
+    pub total_max_height: u64,
+    pub current_max_height: u64,
+    current_instruction_position: u64,
 }
 
 impl Game {
     pub fn new(instructions: Vec<Move>) -> Self {
         Self {
-            grid: vec![vec![]; 7],
+            grid: vec![VecDeque::new(); 7],
             current_rock: Rock::new(Shape::HorizontalLine, (0, 3)),
             instructions,
-            max_height: 0,
+            total_max_height: 0,
+            current_max_height: 0,
             current_instruction_position: 0,
         }
     }
 
-    fn fill_grid_to_height(&mut self, height: u32) {
-        if (self.grid[0].len() as u32) < height {
-            let amount_to_insert = height - self.grid[0].len() as u32;
+    fn fill_grid_to_height(&mut self, height: u64) {
+        if (self.grid[0].len() as u64) < height {
+            let amount_to_insert = height - self.grid[0].len() as u64;
             for _ in 0..=amount_to_insert {
                 for x_coordinate in 0..self.grid.len() {
-                    self.grid[x_coordinate].push(FieldType::Air);
+                    self.grid[x_coordinate].push_back(FieldType::Air);
                 }
             }
         }
     }
 
-    fn update_vec_of_fields(&mut self, field_type: FieldType, items: &Vec<(u32, u32)>) {
+    fn update_vec_of_fields(&mut self, field_type: FieldType, items: &Vec<(u64, u64)>) {
         for c_item in items {
             self.grid[c_item.0 as usize][c_item.1 as usize] = field_type;
         }
     }
 
-    fn update_max_height(&mut self, items: &Vec<(u32, u32)>) {
+    fn update_max_height(&mut self, items: &Vec<(u64, u64)>, corrigate: bool) {
+        let old_max_height = self.current_max_height;
+
         let mut max_height_of_item = 0;
         for c_item in items {
-            max_height_of_item = max_height_of_item.max(c_item.1 + 1);
+            if corrigate {
+                max_height_of_item = max_height_of_item.max(c_item.1);
+            } else {
+                max_height_of_item = max_height_of_item.max(c_item.1 + 1);
+            }
         }
         /*println!(
             "Max height: {}",
             max_height_of_item.max(self.max_height) + 1
         );*/
-        self.max_height = max_height_of_item.max(self.max_height);
+        self.current_max_height = max_height_of_item.max(old_max_height);
+        //self.total_max_height = max_height_of_item.max(self.total_max_height);
+        if self.current_max_height - old_max_height > 0 {
+            self.total_max_height += self.current_max_height - old_max_height;
+        }
     }
 
     pub fn move_rock(&mut self) {
         let shape_height = self.current_rock.shape.get_max_height();
-        self.fill_grid_to_height(shape_height + self.max_height + 3);
+        self.fill_grid_to_height(shape_height + self.current_max_height + 3);
 
+        //move pieces
         'outer: loop {
             let c_instruction = self.instructions[self.current_instruction_position as usize];
             if (self.current_instruction_position as usize) < self.instructions.len() - 1 {
@@ -223,7 +237,17 @@ impl Game {
         }
         let fields_to_update = self.current_rock.points.clone();
         self.update_vec_of_fields(FieldType::Rock, &fields_to_update);
-        self.update_max_height(&fields_to_update);
+
+        //optimize parsing
+        if self.grid[0].len() > 1000 {
+            for x_coordinate in 0..self.grid.len() {
+                self.grid[x_coordinate].pop_front();
+            }
+            self.current_max_height -= 1;
+            self.update_max_height(&fields_to_update, true);
+        } else {
+            self.update_max_height(&fields_to_update, false);
+        }
 
         //prepare next rock
         let next_rock_shape = match self.current_rock.shape {
@@ -233,7 +257,7 @@ impl Game {
             Shape::VerticalLine => Shape::Cube,
             Shape::Cube => Shape::HorizontalLine,
         };
-        self.current_rock = Rock::new(next_rock_shape, (0, self.max_height + 3));
+        self.current_rock = Rock::new(next_rock_shape, (0, self.current_max_height + 3));
     }
 }
 
