@@ -36,11 +36,17 @@ fn challenge_1_2() -> io::Result<()> {
         rocks.push((split[0], split[1], split[2]));
     }
     let mut cave = Cave::new(highest_x as usize, highest_y as usize, highest_z as usize);
-    cave.bulk_update_coordinates(rocks, FieldType::Rock);
+    cave.bulk_update_coordinates(rocks, FieldType::Lava);
 
     println!("Points 1:\t{}", cave.get_surface_area());
     //part 2
-    println!("Points 2:\t{}", "points");
+    cave.generate_trapped_air();
+    println!(
+        "Points 2:\t{}",
+        cave.get_surface_area() - cave.get_trapped_air_touching_lava()
+    );
+
+    //println!("{}", cave);
 
     Ok(())
 }
