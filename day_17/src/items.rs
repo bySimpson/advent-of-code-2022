@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt;
 
@@ -80,7 +81,7 @@ impl Shape {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Rock {
     points: Vec<(u64, u64)>,
-    shape: Shape,
+    pub shape: Shape,
 }
 
 impl Rock {
@@ -101,17 +102,17 @@ pub enum FieldType {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Game {
     pub grid: Vec<VecDeque<FieldType>>,
-    current_rock: Rock,
+    pub current_rock: Rock,
     instructions: Vec<Move>,
     pub total_max_height: u64,
     pub current_max_height: u64,
-    current_instruction_position: u64,
+    pub current_instruction_position: u64,
 }
 
 impl Game {
     pub fn new(instructions: Vec<Move>) -> Self {
         Self {
-            grid: vec![VecDeque::new(); 7],
+            grid: vec![VecDeque::with_capacity(1100); 7],
             current_rock: Rock::new(Shape::HorizontalLine, (0, 3)),
             instructions,
             total_max_height: 0,
@@ -134,6 +135,34 @@ impl Game {
     fn update_vec_of_fields(&mut self, field_type: FieldType, items: &Vec<(u64, u64)>) {
         for c_item in items {
             self.grid[c_item.0 as usize][c_item.1 as usize] = field_type;
+        }
+    }
+
+    fn add_rock_to_grid(&mut self) {
+        for c_item in self.current_rock.points.iter() {
+            self.grid[c_item.0 as usize][c_item.1 as usize] = FieldType::Rock;
+        }
+    }
+
+    fn update_height_rock(&mut self, corrigate: bool) {
+        let old_max_height = self.current_max_height;
+
+        let mut max_height_of_item = 0;
+        for c_item in self.current_rock.points.iter() {
+            if corrigate {
+                max_height_of_item = max_height_of_item.max(c_item.1);
+            } else {
+                max_height_of_item = max_height_of_item.max(c_item.1 + 1);
+            }
+        }
+        /*println!(
+            "Max height: {}",
+            max_height_of_item.max(self.max_height) + 1
+        );*/
+        self.current_max_height = max_height_of_item.max(old_max_height);
+        //self.total_max_height = max_height_of_item.max(self.total_max_height);
+        if self.current_max_height - old_max_height > 0 {
+            self.total_max_height += self.current_max_height - old_max_height;
         }
     }
 
@@ -235,8 +264,9 @@ impl Game {
                 c_point.1 -= 1;
             }
         }
-        let fields_to_update = self.current_rock.points.clone();
-        self.update_vec_of_fields(FieldType::Rock, &fields_to_update);
+        //let fields_to_update = self.current_rock.points.clone();
+        //self.update_vec_of_fields(FieldType::Rock, &fields_to_update);
+        self.add_rock_to_grid();
 
         //optimize parsing
         if self.grid[0].len() > 1000 {
@@ -244,11 +274,15 @@ impl Game {
                 self.grid[x_coordinate].pop_front();
             }
             self.current_max_height -= 1;
-            self.update_max_height(&fields_to_update, true);
+            //self.update_max_height(&fields_to_update, true);
+            self.update_height_rock(true);
         } else {
-            self.update_max_height(&fields_to_update, false);
+            //self.update_max_height(&fields_to_update, false);
+            self.update_height_rock(false);
         }
+    }
 
+    pub fn prepare_next_rock(&mut self) {
         //prepare next rock
         let next_rock_shape = match self.current_rock.shape {
             Shape::HorizontalLine => Shape::Cross,
