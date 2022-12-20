@@ -21,6 +21,36 @@ impl Cave {
         }
     }
 
+    fn get_neighbours(&self, coord: (usize, usize, usize)) -> Vec<FieldType> {
+        let mut sides = vec![];
+        let (x_coord, y_coord, z_coord) = coord;
+        if x_coord < self.grid.len() - 1 {
+            //positive x
+            sides.push(self.grid[x_coord + 1][y_coord][z_coord]);
+        }
+        if x_coord > 0 {
+            //negative x
+            sides.push(self.grid[x_coord - 1][y_coord][z_coord]);
+        }
+        if y_coord < self.grid[x_coord].len() - 1 {
+            //positive y
+            sides.push(self.grid[x_coord][y_coord + 1][z_coord])
+        }
+        if y_coord > 0 {
+            //negative y
+            sides.push(self.grid[x_coord][y_coord - 1][z_coord]);
+        }
+        if z_coord < self.grid[x_coord][y_coord].len() - 1 {
+            //positive z
+            sides.push(self.grid[x_coord][y_coord][z_coord + 1]);
+        }
+        if z_coord > 0 {
+            //negative z
+            sides.push(self.grid[x_coord][y_coord][z_coord - 1]);
+        }
+        sides
+    }
+
     pub fn get_surface_area(&self) -> u32 {
         let mut surfaces = 0;
         for x_coord in 0..self.grid.len() {
@@ -28,31 +58,7 @@ impl Cave {
                 for z_coord in 0..self.grid[x_coord][y_coord].len() {
                     let c_val = self.grid[x_coord][y_coord][z_coord];
                     if c_val == FieldType::Rock {
-                        let mut sides = vec![];
-                        if x_coord < self.grid.len() - 1 {
-                            //positive x
-                            sides.push(self.grid[x_coord + 1][y_coord][z_coord]);
-                        }
-                        if x_coord > 0 {
-                            //negative x
-                            sides.push(self.grid[x_coord - 1][y_coord][z_coord]);
-                        }
-                        if y_coord < self.grid[x_coord].len() - 1 {
-                            //positive y
-                            sides.push(self.grid[x_coord][y_coord + 1][z_coord])
-                        }
-                        if y_coord > 0 {
-                            //negative y
-                            sides.push(self.grid[x_coord][y_coord - 1][z_coord]);
-                        }
-                        if z_coord < self.grid[x_coord][y_coord].len() - 1 {
-                            //positive z
-                            sides.push(self.grid[x_coord][y_coord][z_coord + 1]);
-                        }
-                        if z_coord > 0 {
-                            //negative z
-                            sides.push(self.grid[x_coord][y_coord][z_coord - 1]);
-                        }
+                        let sides = self.get_neighbours((x_coord, y_coord, z_coord));
                         for c_side in sides {
                             if c_side == FieldType::Air {
                                 surfaces += 1;
