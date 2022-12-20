@@ -28,19 +28,45 @@ impl Cave {
                 for z_coord in 0..self.grid[x_coord][y_coord].len() {
                     let c_val = self.grid[x_coord][y_coord][z_coord];
                     if c_val == FieldType::Rock {
-                        let positive_x = self.grid[x_coord + 1][y_coord][z_coord];
-                        let negative_x = self.grid[x_coord - 1][y_coord][z_coord];
-                        let positive_y = self.grid[x_coord][y_coord + 1][z_coord];
-                        let negative_y = self.grid[x_coord][y_coord - 1][z_coord];
-                        let positive_z = self.grid[x_coord][y_coord][z_coord + 1];
-                        let negative_z = self.grid[x_coord][y_coord][z_coord - 1];
-                        let sides = vec![
-                            positive_x, negative_x, positive_y, negative_y, positive_z, negative_z,
-                        ];
+                        let mut sides = vec![];
+                        if x_coord < self.grid.len() - 1 {
+                            //positive x
+                            sides.push(self.grid[x_coord + 1][y_coord][z_coord]);
+                        }
+                        if x_coord > 0 {
+                            //negative x
+                            sides.push(self.grid[x_coord - 1][y_coord][z_coord]);
+                        }
+                        if y_coord < self.grid[x_coord].len() - 1 {
+                            //positive y
+                            sides.push(self.grid[x_coord][y_coord + 1][z_coord])
+                        }
+                        if y_coord > 0 {
+                            //negative y
+                            sides.push(self.grid[x_coord][y_coord - 1][z_coord]);
+                        }
+                        if z_coord < self.grid[x_coord][y_coord].len() - 1 {
+                            //positive z
+                            sides.push(self.grid[x_coord][y_coord][z_coord + 1]);
+                        }
+                        if z_coord > 0 {
+                            //negative z
+                            sides.push(self.grid[x_coord][y_coord][z_coord - 1]);
+                        }
                         for c_side in sides {
                             if c_side == FieldType::Air {
                                 surfaces += 1;
                             }
+                        }
+                        // check for edge cases
+                        if x_coord == self.grid.len() - 1 || x_coord == 0 {
+                            surfaces += 1;
+                        }
+                        if y_coord == self.grid[x_coord].len() - 1 || y_coord == 0 {
+                            surfaces += 1;
+                        }
+                        if z_coord == self.grid[x_coord][y_coord].len() - 1 || z_coord == 0 {
+                            surfaces += 1;
                         }
                     }
                 }
