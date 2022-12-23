@@ -5,6 +5,7 @@ pub enum Operation {
     Multiply,
     Divide,
     None,
+    Equal,
 }
 
 #[derive(Debug, Clone, PartialEq)]
